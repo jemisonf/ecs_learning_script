@@ -1,22 +1,26 @@
 import configparser
-import json
+
 import requests
 
+HOST_DEFAULT = "api.oregonstate.edu"
 
-class CredentialHelper:
-    def __init__(self, config_file="config.ini"):
+
+class ConfigHelper:
+    def __init__(self, config_file):
         self.config = configparser.ConfigParser()
         self.config.read(config_file)
 
     def get_access_token(self):
         if "credentials" not in self.config:
             raise "config file does not include credentials"
+        credentials = self.config["credentials"]
 
-        if "client_id" not in self.config["credentials"] or "client_secret" not in self.config["credentials"]:
-            raise "credentials section does not contain client_id or client_secret"
-
-        client_id = self.config["credentials"]["client_id"]
-        client_secret = self.config["credentials"]["client_secret"]
+        try:
+            client_id = credentials["client_id"]
+            client_secret = credentials["client_secret"]
+        except KeyError:
+            raise ("credentials section does not contain"
+                   " client_id or client_secret")
 
         params = {
             "client_id": client_id,
@@ -24,9 +28,21 @@ class CredentialHelper:
             "grant_type": "client_credentials",
         }
         res = requests.post(
-            "https://api.oregonstate.edu/oauth2/token", params)
+            f'{self.get_host_url()}oauth2/token', params)
         res.raise_for_status()
 
-        data = json.loads(res.text)
+        data = res.json()
 
         return data["access_token"]
+
+    def get_host_url(self):
+        try:
+            host = self.config['api']['host']
+        except KeyError:
+            host = HOST_DEFAULT
+        return f'https://{host}/'
+
+
+if __name__ == "__main__":
+    cred_helper = ConfigHelper("config.ini")
+    print(cred_helper.get_access_token(), end="")
