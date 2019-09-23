@@ -21,8 +21,6 @@ def parse_arguments():
                          help="find the building with ID BUILDING_ID")
     filters.add_argument("--campus", action="store",
                          help="search for buildings located in campus CAMPUS")
-    filters.add_argument("--num-restrooms", action="store", type=int,
-                         help="search for a building with NUM_RESTROOMS restrooms")
     filters.add_argument("--gi-restrooms", action="store_true",
                          help="search for building with gender inclusive restrooms")
     filters.add_argument("--query", action="store",
