@@ -43,9 +43,14 @@ def parse_arguments():
             'q': args.query,
             'campus': args.campus,
         },
-        'filters': {
-            'bldgID': args.building_id,
-        }
+        'buildingID': args.building_id,
+    }
+
+
+def get_standard_headers(auth_token):
+    return {
+        'Authorization': f'Bearer {auth_token}',
+        'Content-Type': 'application/json'
     }
 
 
@@ -57,21 +62,8 @@ def parse_query_filters(filters):
     return output_filters
 
 
-def post_filter_locations(locations, args):
-    for filter_key in parse_query_filters(args['filters']):
-        locations = [location for location in locations
-                     if location['attributes'][filter_key] ==
-                     args['filters'][filter_key]]
-    if args['filters']['bldgID'] is not None and len(locations) > 0:
-        return locations[0]
-    return locations
-
-
-def fetch_locations(host, auth_token, args):
-    headers = {
-        'Authorization': f'Bearer {auth_token}',
-        'Content-Type': 'application/json'
-    }
+def fetch_locations_batch(host, auth_token, args):
+    headers = get_standard_headers(auth_token)
 
     params = {
         'page[size]': 10000
@@ -86,7 +78,29 @@ def fetch_locations(host, auth_token, args):
 
     locations = data['data']
 
-    return post_filter_locations(locations, args)
+    return locations
+
+
+def fetch_single_location(host, auth_token, args):
+    headers = get_standard_headers(auth_token)
+
+    building_id = args['buildingID']
+
+    r = requests.get(f'{host}v1/locations/{building_id}', headers=headers)
+    r.raise_for_status()
+
+    data = r.json()
+
+    location = data['data']
+
+    return location
+
+
+def fetch_locations(host, auth_token, args):
+    if args['buildingID'] is not None:
+        return fetch_single_location(host, auth_token, args)
+    else:
+        return fetch_locations_batch(host, auth_token, args)
 
 
 args = parse_arguments()
