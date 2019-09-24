@@ -33,7 +33,10 @@ class ConfigHelper:
 
         data = res.json()
 
-        return data["access_token"]
+        if "access_token" in data:
+            return data["access_token"]
+        else:
+            raise "returned JSON data does not include access_token value"
 
     def get_host_url(self):
         try:
