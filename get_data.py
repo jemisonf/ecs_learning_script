@@ -4,7 +4,7 @@ import sys
 
 import requests
 
-from credential_helper import ConfigHelper
+from config_helper import ConfigHelper
 
 DEFAULT_CONFIG_FILE = "config.ini"
 

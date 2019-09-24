@@ -47,5 +47,5 @@ class ConfigHelper:
 
 
 if __name__ == "__main__":
-    cred_helper = ConfigHelper("config.ini")
-    print(cred_helper.get_access_token(), end="")
+    config_helper = ConfigHelper("config.ini")
+    print(config_helper.get_access_token(), end="")
